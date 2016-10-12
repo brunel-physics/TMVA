@@ -300,7 +300,7 @@ void theMVAtool::doTraining(TString channel, TString inDir, bool sigMode){
    delete factory;
 
    // Launch the GUI for the root macros
-   if (!gROOT->IsBatch()) TMVAGui( outfileName );
+   if (!gROOT->IsBatch()) TMVA::TMVAGui( outfileName );
 
 }
 

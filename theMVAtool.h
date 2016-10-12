@@ -1,7 +1,6 @@
 #ifndef theMVAtool_h
 #define theMVAtool_h
 
-#include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
 #include <TH2F.h>
@@ -21,19 +20,18 @@
 #include <map>
 #include <string>
 
-#include "TChain.h"
-#include "TFile.h"
-#include "TTree.h"
-#include "TString.h"
-#include "TObjString.h"
-#include "TSystem.h"
-#include "TROOT.h"
+#include <TChain.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TString.h>
+#include <TObjString.h>
+#include <TSystem.h>
 
-#include "test/TMVAGui.C"
+#include <TMVA/TMVAGui.h>
 
-#include "TMVA/Factory.h"
-#include "TMVA/Reader.h"
-#include "TMVA/Tools.h"
+#include <TMVA/Factory.h>
+#include <TMVA/Reader.h>
+#include <TMVA/Tools.h>
 
 
 
