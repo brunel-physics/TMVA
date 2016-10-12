@@ -2,6 +2,10 @@
 *.d
 *.so
 *.pcm
+*.png
+*.pdf
+*.gif
+*.root
 
 ## Directories
 weights/
