@@ -1,4 +1,4 @@
-#define theMVAtool_cxx
+#define MVATool_cxx
 
 #include <iostream>
 
@@ -11,10 +11,10 @@
 #include <TMVA/Factory.h>
 #include <TMVA/Tools.h>
 
-#include "theMVAtool.h"
+#include "MVATool.h"
 
 
-theMVAtool::theMVAtool(const bool doCtrlReg)
+MVATool::MVATool(const bool doCtrlReg)
     : varList{
         // "mTW",
         // "wQuark1Pt",
@@ -168,7 +168,7 @@ theMVAtool::theMVAtool(const bool doCtrlReg)
 }
 
 
-theMVAtool::theMVAtool(const vector<TString>& thevarlist,
+MVATool::MVATool(const vector<TString>& thevarlist,
         const vector<TString>& thesamplelist,
         const vector<TString>& thesystlist,
         const vector<TString>& thereglist)
@@ -179,11 +179,11 @@ theMVAtool::theMVAtool(const vector<TString>& thevarlist,
 {}
 
 
-theMVAtool::~theMVAtool()
+MVATool::~MVATool()
 {}
 
 
-void theMVAtool::doTraining(const TString& channel, const TString& inDir,
+void MVATool::doTraining(const TString& channel, const TString& inDir,
         const bool sigMode) const
 {
     // Load the library
@@ -319,7 +319,7 @@ void theMVAtool::doTraining(const TString& channel, const TString& inDir,
 }
 
 
-void theMVAtool::doReading(const float bdtcut, const TString& channel, 
+void MVATool::doReading(const float bdtcut, const TString& channel, 
         const TString& inDir, const TString& outDir, const bool usePseudoData)
 {
     // This loads the library
@@ -367,7 +367,7 @@ void theMVAtool::doReading(const float bdtcut, const TString& channel,
 }
 
 
-void theMVAtool::loopInSample(TFile* const input, const TString& sample,
+void MVATool::loopInSample(TFile* const input, const TString& sample,
         vector<float>& treevars, const float bdtcut, const TString& channel)
 {
     input->cd();
@@ -428,7 +428,7 @@ void theMVAtool::loopInSample(TFile* const input, const TString& sample,
 }
 
 
-void theMVAtool::createHisto(const TString& sample, const TString& channel)
+void MVATool::createHisto(const TString& sample, const TString& channel)
 {
     vector<TH1F*> histovect;
     for (size_t j{0}; j < varList.size(); j++)
@@ -560,7 +560,7 @@ void theMVAtool::createHisto(const TString& sample, const TString& channel)
 }
 
 
-void theMVAtool::fillHisto(const TString& sample, vector<float>& theVar,
+void MVATool::fillHisto(const TString& sample, vector<float>& theVar,
         const double mva, const double mtw, const double weight)
 {
    vector<TH1F*> histovect{theHistoMap[sample]};
@@ -575,7 +575,7 @@ void theMVAtool::fillHisto(const TString& sample, vector<float>& theVar,
 }
 
 
-void theMVAtool::scaleHisto(const TString& sample, const double thescale)
+void MVATool::scaleHisto(const TString& sample, const double thescale)
 {
   vector<TH1F*> histovect{theHistoMap[sample]};
   for (size_t i{0}; i < varList.size() + 1; i++)
@@ -585,7 +585,7 @@ void theMVAtool::scaleHisto(const TString& sample, const double thescale)
 }
 
 
-void theMVAtool::writeHisto(const TString& sample, const TString& syst,
+void MVATool::writeHisto(const TString& sample, const TString& syst,
         const TString& reg)
 {
     if (theOutputFileMap[sample] == nullptr)
@@ -614,7 +614,7 @@ void theMVAtool::writeHisto(const TString& sample, const TString& syst,
 }
 
 
-void theMVAtool::makePseudoDataMVA(const TString& inDir, const TString& channel,
+void MVATool::makePseudoDataMVA(const TString& inDir, const TString& channel,
         const bool useData) const
 {
     TRandom3 therand{0}; //Randomization
@@ -688,7 +688,7 @@ void theMVAtool::makePseudoDataMVA(const TString& inDir, const TString& channel,
 }
 
 
-void theMVAtool::makePseudoDataVars(const TString& inDir, const TString& channel,
+void MVATool::makePseudoDataVars(const TString& inDir, const TString& channel,
         const bool useData) const
 {
     TRandom3 therand{0}; //Randomization

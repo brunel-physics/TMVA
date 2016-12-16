@@ -1,5 +1,5 @@
-#ifndef theMVAtool_h
-#define theMVAtool_h
+#ifndef MVATool_h
+#define MVATool_h
 
 #include <TFile.h>
 #include <TFile.h>
@@ -13,15 +13,15 @@
 
 #include <TMVA/Reader.h>
 
-class theMVAtool
+class MVATool final
 {
     public:
-        explicit theMVAtool(const bool doCtrlReg = false);
-        theMVAtool(const vector<TString>& thevarlist,
+        explicit MVATool(const bool doCtrlReg = false);
+        MVATool(const vector<TString>& thevarlist,
                 const vector<TString>& thesamplelist,
                 const vector<TString>& thesystlist,
                 const vector<TString>& thereglist);
-        ~theMVAtool();
+        ~MVATool();
 
         void doTraining(const TString& channel = "all",
                 const TString& inDir = "inputroot/met0mtw0/",

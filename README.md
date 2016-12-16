@@ -3,11 +3,11 @@ Commands used:
 ```bash
 mkdir -p outputroot weights TemplateRootFiles
 
-root -l -b theMVAtool.C+
+root -l -b MVATool.C+
 ```
 
 ```c++
-theMVAtool tmva(true)
+MVATool tmva(true)
 
 tmva.doTraining("all", "/scratch/data/TopPhysics/mvaDirs/inputs/2016/sigCtrl/mz5mw50/", true)
 tmva.doTraining("ee", "/scratch/data/TopPhysics/mvaDirs/inputs/2016/sigCtrl/mz5mw50/", true)
@@ -25,11 +25,11 @@ hadd -f outputroot/output_merged_all.root outputroot/output_all_*.root
 hadd -f outputroot/output_merged_ee.root outputroot/output_ee_*.root
 hadd -f outputroot/output_merged_mumu.root outputroot/output_mumu_*.root
 
-root -l -b theMVAtool.C+
+root -l -b MVATool.C+
 ```
 
 ```c++
-theMVAtool tmva(true)
+MVATool tmva(true)
 
 tmva.makePseudoDataVars("outputroot/", "all", false)
 tmva.makePseudoDataVars("outputroot/", "ee", false)
