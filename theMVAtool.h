@@ -36,7 +36,7 @@ class theMVAtool
                 vector<float>& treevars, const float bdtcut,
                 const TString& channel);
 
-        //deal with histograms
+        // deal with histograms
         void createHisto(const TString& sample, const TString& channel);
         void fillHisto(const TString& sample, vector<float>& theVar,
                 const double mva, const double mtw, const double weight);
@@ -44,15 +44,16 @@ class theMVAtool
                 const TString& reg);
         void scaleHisto(const TString& sample, const double thescale);
 
-        const vector<TString> varList;
-        const vector<TString> samplelist;
-        const vector<TString> systlist;
-        const vector<TString> regList;
-
+        // generate pseudodata
         void makePseudoDataMVA(const TString& inDir, const TString& channel,
                 const bool useData) const;
         void makePseudoDataVars(const TString& inDir, const TString& channel,
                 const bool useData) const;
+
+        const vector<TString> varList;
+        const vector<TString> samplelist;
+        const vector<TString> systlist;
+        const vector<TString> regList;
 
         map<TString, vector<TH1F*>> theHistoMap;
         map<TString, int> theVarMap;
