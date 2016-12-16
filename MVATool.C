@@ -163,19 +163,19 @@ MVATool::MVATool(const bool doCtrlReg)
 {
     for (size_t i{0}; i < varList.size(); i++)
     {
-        theVarMap[varList[i]] = i;
+        varMap[varList[i]] = i;
     }
 }
 
 
-MVATool::MVATool(const vector<TString>& thevarlist,
-        const vector<TString>& thesamplelist,
-        const vector<TString>& thesystlist,
-        const vector<TString>& thereglist)
-    : varList{thevarlist}
-    , samplelist{thesamplelist}
-    , systlist{thesystlist}
-    , regList{thereglist}
+MVATool::MVATool(const vector<TString>& varList_,
+        const vector<TString>& sampleList_,
+        const vector<TString>& systList_,
+        const vector<TString>& regList_)
+    : varList{varList_}
+    , samplelist{sampleList_}
+    , systlist{systList_}
+    , regList{regList_}
 {}
 
 
@@ -341,7 +341,7 @@ void MVATool::doReading(const float bdtcut, const TString& channel,
         //cout << sample << endl;
         TFile* const inFile{new TFile{(inDir + "histofile_" + sample + ".root"), "read"}};
         TFile* const outFile{new TFile{(outDir + "output_" + channel + "_" + sample+".root"), "recreate"}};
-        theOutputFileMap[sample] = outFile;
+        outFileMap[sample] = outFile;
 
         //loop over systematics
         cout << "processing sample " << sample << endl;
@@ -378,22 +378,22 @@ void MVATool::loopInSample(TFile* const input, const TString& sample,
         theTree->SetBranchAddress(varList[ivar].Data(), &(treevars[ivar]));
     }
 
-    float theweight{0};
-    int theChannel{-1};
+    float weight{0};
+    int eventChannel{-1};
     float mtwValue{-1};
-    int theSelChannel{-1};
+    int selChannel{-1};
 
-    theTree->SetBranchAddress("EvtWeight", &theweight);
-    theTree->SetBranchAddress("Channel", &theChannel);
+    theTree->SetBranchAddress("EvtWeight", &weight);
+    theTree->SetBranchAddress("Channel", &eventChannel);
     theTree->SetBranchAddress("mTW", &mtwValue);
 
     if (channel == "mumu")
     {
-        theSelChannel = 0;
+        selChannel = 0;
     }
     else if (channel == "ee" )
     {
-        theSelChannel = 1;
+        selChannel = 1;
     }
 
     if (theTree == nullptr)
@@ -406,16 +406,16 @@ void MVATool::loopInSample(TFile* const input, const TString& sample,
         constexpr double sf_local{1};
         theTree->GetEntry(i);
 
-        if (channel != "all" && theChannel != theSelChannel)
+        if (channel != "all" && eventChannel != selChannel)
         {
             continue;
         }
 
-        if (isnan(theweight))
+        if (isnan(weight))
         {
             cout << "NaN weight encountered!" << " : " << i << endl;
         }
-        theweight *= sf_local;
+        weight *= sf_local;
 
         const double mvaValue = reader->EvaluateMVA("BDT");
         if (mvaValue > bdtcut)
@@ -423,7 +423,7 @@ void MVATool::loopInSample(TFile* const input, const TString& sample,
             continue;
         }
 
-        fillHisto(sample, treevars, mvaValue, mtwValue, theweight);
+        fillHisto(sample, treevars, mvaValue, mtwValue, weight);
     }
 }
 
@@ -556,18 +556,18 @@ void MVATool::createHisto(const TString& sample, const TString& channel)
     histo->Sumw2();
     histovect.emplace_back(histo);
 
-    theHistoMap[sample] = histovect;
+    histMap[sample] = histovect;
 }
 
 
-void MVATool::fillHisto(const TString& sample, vector<float>& theVar,
+void MVATool::fillHisto(const TString& sample, vector<float>& vars,
         const double mva, const double mtw, const double weight)
 {
-   vector<TH1F*> histovect{theHistoMap[sample]};
+   vector<TH1F*> histovect{histMap[sample]};
 
    for (size_t i{0}; i<  varList.size(); i++)
    {
-       histovect[i]->Fill(theVar[i], weight);
+       histovect[i]->Fill(vars[i], weight);
    }
 
    histovect[varList.size()]->Fill(mtw,weight);
@@ -575,12 +575,12 @@ void MVATool::fillHisto(const TString& sample, vector<float>& theVar,
 }
 
 
-void MVATool::scaleHisto(const TString& sample, const double thescale)
+void MVATool::scaleHisto(const TString& sample, const double sf)
 {
-  vector<TH1F*> histovect{theHistoMap[sample]};
+  vector<TH1F*> histovect{histMap[sample]};
   for (size_t i{0}; i < varList.size() + 1; i++)
   {
-      histovect[i]->Scale(thescale);
+      histovect[i]->Scale(sf);
   }
 }
 
@@ -588,13 +588,13 @@ void MVATool::scaleHisto(const TString& sample, const double thescale)
 void MVATool::writeHisto(const TString& sample, const TString& syst,
         const TString& reg)
 {
-    if (theOutputFileMap[sample] == nullptr)
+    if (outFileMap[sample] == nullptr)
     {
         cout << "no output file for sample " << sample << endl;
     }
 
-    theOutputFileMap[sample]->cd();
-    vector<TH1F*> histovect{theHistoMap[reg+sample+syst]};
+    outFileMap[sample]->cd();
+    vector<TH1F*> histovect{histMap[reg+sample+syst]};
 
     for (const auto& hist: histovect)
     {
@@ -617,7 +617,7 @@ void MVATool::writeHisto(const TString& sample, const TString& syst,
 void MVATool::makePseudoDataMVA(const TString& inDir, const TString& channel,
         const bool useData) const
 {
-    TRandom3 therand{0}; //Randomization
+    TRandom3 rand{0}; //Randomization
 
     TFile file{inDir + "output_merged_" + channel + ".root", "UPDATE"};
 
@@ -675,7 +675,7 @@ void MVATool::makePseudoDataMVA(const TString& inDir, const TString& channel,
         const int bin_content{boost::numeric_cast<int>
             (h_sum->GetBinContent(i + 1))}; //cout<<"initial content = "<<bin_content<<endl;
         const int new_bin_content{boost::numeric_cast<int>
-            (therand.Poisson(bin_content))}; //cout<<"new content = "<<new_bin_content<<endl;
+            (rand.Poisson(bin_content))}; //cout<<"new content = "<<new_bin_content<<endl;
         h_sum->SetBinContent(i + 1, new_bin_content);
     }
 
@@ -691,7 +691,7 @@ void MVATool::makePseudoDataMVA(const TString& inDir, const TString& channel,
 void MVATool::makePseudoDataVars(const TString& inDir, const TString& channel,
         const bool useData) const
 {
-    TRandom3 therand{0}; //Randomization
+    TRandom3 rand{0}; //Randomization
 
     TFile file{inDir+"output_merged_" + channel + ".root", "UPDATE"};
 
@@ -755,7 +755,7 @@ void MVATool::makePseudoDataVars(const TString& inDir, const TString& channel,
             const int bin_content{boost::numeric_cast<int>
                 (h_sum->GetBinContent(i + 1))}; //cout<<"initial content = "<<bin_content<<endl;
             const int new_bin_content{boost::numeric_cast<int>
-                (therand.Poisson(bin_content))}; //cout<<"new content = "<<new_bin_content<<endl;
+                (rand.Poisson(bin_content))}; //cout<<"new content = "<<new_bin_content<<endl;
             h_sum->SetBinContent(i + 1, new_bin_content);
         }
 

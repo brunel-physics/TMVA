@@ -17,10 +17,10 @@ class MVATool final
 {
     public:
         explicit MVATool(const bool doCtrlReg = false);
-        MVATool(const vector<TString>& thevarlist,
-                const vector<TString>& thesamplelist,
-                const vector<TString>& thesystlist,
-                const vector<TString>& thereglist);
+        MVATool(const vector<TString>& varList_,
+                const vector<TString>& sampleList_,
+                const vector<TString>& systList_,
+                const vector<TString>& regList_);
         ~MVATool();
 
         void doTraining(const TString& channel = "all",
@@ -38,11 +38,11 @@ class MVATool final
 
         // deal with histograms
         void createHisto(const TString& sample, const TString& channel);
-        void fillHisto(const TString& sample, vector<float>& theVar,
+        void fillHisto(const TString& sample, vector<float>& vars,
                 const double mva, const double mtw, const double weight);
         void writeHisto(const TString& sample, const TString& syst,
                 const TString& reg);
-        void scaleHisto(const TString& sample, const double thescale);
+        void scaleHisto(const TString& sample, const double sf);
 
         // generate pseudodata
         void makePseudoDataMVA(const TString& inDir, const TString& channel,
@@ -55,10 +55,9 @@ class MVATool final
         const vector<TString> systlist;
         const vector<TString> regList;
 
-        map<TString, vector<TH1F*>> theHistoMap;
-        map<TString, int> theVarMap;
-
-        map<TString, TFile*> theOutputFileMap;
+        map<TString, vector<TH1F*>> histMap;
+        map<TString, int> varMap;
+        map<TString, TFile*> outFileMap;
 
         TMVA::Reader *reader; 
 };
