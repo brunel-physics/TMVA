@@ -331,7 +331,7 @@ void MVATool::doReading(const float bdtcut, const TString& channel,
 
     for (size_t i{0}; i < varList.size(); i++)
     {
-        reader->AddVariable(varList.at(i).Data(),  &(treevars.at(i)));
+        reader->AddVariable(varList.at(i),  &(treevars.at(i)));
     }
 
     reader->BookMVA("BDT", ("weights/BDT_trainning_" + channel + "_tzq_BDT.weights.xml"));
@@ -375,7 +375,7 @@ void MVATool::loopInSample(TFile* const input, const TString& sample,
 
     for (size_t ivar{0}; ivar < varList.size(); ivar++)
     {
-        theTree->SetBranchAddress(varList[ivar].Data(), &(treevars[ivar]));
+        theTree->SetBranchAddress(varList[ivar], &(treevars[ivar]));
     }
 
     float weight{0};
@@ -540,19 +540,19 @@ void MVATool::createHisto(const TString& sample, const TString& channel)
         else if (varList[j]=="w2TopDelPhi"    ){nbins = 20; xmin =  0; xmax = 3.2;}
         else {cout << "warning : no TH1F definition for variable " << varList[j] << endl;}
 
-        TH1F* const histo{new TH1F{(varList[j]+"_"+channel+"__"+sample).Data(),
-            (varList[j]+"_"+channel+"__"+sample).Data(), nbins, xmin, xmax}};
+        TH1F* const histo{new TH1F{(varList[j]+"_"+channel+"__"+sample),
+            (varList[j]+"_"+channel+"__"+sample), nbins, xmin, xmax}};
         histo->Sumw2();
         histovect.emplace_back(histo);
     }
 
-    TH1F* const histomTW{new TH1F{("mTW_"+channel+"__"+sample).Data(),
-        ("mTW_"+channel+"__"+sample).Data(), 15,0.,200.}};
+    TH1F* const histomTW{new TH1F{("mTW_"+channel+"__"+sample),
+        ("mTW_"+channel+"__"+sample), 15,0.,200.}};
     histomTW->Sumw2();
     histovect.emplace_back(histomTW);
 
-    TH1F* const histo{new TH1F{("MVA_"+channel+"__"+sample).Data(),
-        ("MVA_"+channel+"__"+sample).Data(),  20, -1., 1.}};
+    TH1F* const histo{new TH1F{("MVA_"+channel+"__"+sample),
+        ("MVA_"+channel+"__"+sample),  20, -1., 1.}};
     histo->Sumw2();
     histovect.emplace_back(histo);
 
