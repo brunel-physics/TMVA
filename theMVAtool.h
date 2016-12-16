@@ -16,7 +16,7 @@
 class theMVAtool
 {
     public:
-        theMVAtool(const bool doCtrlReg = false);
+        explicit theMVAtool(const bool doCtrlReg = false);
         theMVAtool(const vector<TString>& thevarlist,
                 const vector<TString>& thesamplelist,
                 const vector<TString>& thesystlist,
