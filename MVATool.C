@@ -1,6 +1,7 @@
 #define MVATool_cxx
 
 #include <iostream>
+#include <unordered_map>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/numeric/conversion/cast.hpp>
@@ -430,115 +431,134 @@ void MVATool::loopInSample(TFile* const input, const TString& sample,
 
 void MVATool::createHisto(const TString& sample, const TString& channel)
 {
+    static const unordered_map<string, unordered_map<string, double>>
+        histProperties
+    {
+        {"bTagDisc",       {{"nbins", 10}, {"xmin",  0.6}, {"xmax", 1}}},
+        {"fourthJetEta",   {{"nbins", 20}, {"xmin", -5  }, {"xmax", 5.}}},
+        {"fourthJetPhi",   {{"nbins", 20}, {"xmin", -3.2}, {"xmax", 3.2}}},
+        {"fourthJetPt",    {{"nbins", 15}, {"xmin",  0  }, {"xmax", 300}}},
+        {"fourthJetbTag",  {{"nbins", 10}, {"xmin",  0  }, {"xmax", 1}}},
+        {"jetHt",          {{"nbins", 20}, {"xmin",  0  }, {"xmax", 500}}},
+        {"jjdelPhi",       {{"nbins", 10}, {"xmin",  0  }, {"xmax", 3.2}}},
+        {"jjdelR",         {{"nbins", 20}, {"xmin",  0  }, {"xmax", 6}}},
+        {"leadJetEta",     {{"nbins", 10}, {"xmin", -2.5}, {"xmax", 2.5}}},
+        {"leadJetPhi",     {{"nbins", 20}, {"xmin", -3.2}, {"xmax", 3.2}}},
+        {"leadJetPt",      {{"nbins", 20}, {"xmin",  0  }, {"xmax", 500}}},
+        {"leadJetbTag",    {{"nbins", 10}, {"xmin",  0  }, {"xmax", 1}}},
+        {"lep1D0",         {{"nbins", 10}, {"xmin",  0  }, {"xmax", 0.1}}},
+        {"lep1Eta",        {{"nbins", 20}, {"xmin", -5. }, {"xmax", 5.}}},
+        {"lep1Phi",        {{"nbins", 20}, {"xmin", -3.2}, {"xmax", 3.2}}},
+        {"lep1Pt",         {{"nbins", 20}, {"xmin",  0  }, {"xmax", 500}}},
+        {"lep1RelIso",     {{"nbins", 50}, {"xmin",  0  }, {"xmax", 0.2}}},
+        {"lep2D0",         {{"nbins", 10}, {"xmin",  0  }, {"xmax", 0.1}}},
+        {"lep2Eta",        {{"nbins", 20}, {"xmin", -5  }, {"xmax", 5.}}},
+        {"lep2Phi",        {{"nbins", 20}, {"xmin", -3.2}, {"xmax", 3.2}}},
+        {"lep2Pt",         {{"nbins", 20}, {"xmin",  0  }, {"xmax", 500}}},
+        {"lep2RelIso",     {{"nbins", 50}, {"xmin",  0  }, {"xmax", 0.2}}},
+        {"lepEta",         {{"nbins", 20}, {"xmin", -5  }, {"xmax", 5.}}},
+        {"lepHt",          {{"nbins", 15}, {"xmin",  0  }, {"xmax", 4}}},
+        {"lepMass",        {{"nbins", 20}, {"xmin",  0  }, {"xmax", 500}}},
+        {"lepPhi",         {{"nbins", 20}, {"xmin", -3.2}, {"xmax", 3.2}}},
+        {"lepPt",          {{"nbins", 20}, {"xmin",  0  }, {"xmax", 500}}},
+        {"mTW",            {{"nbins", 10}, {"xmin",  0  }, {"xmax", 200}}},
+        {"met",            {{"nbins", 10}, {"xmin",  0  }, {"xmax", 200}}},
+        {"nBjets",         {{"nbins",  4}, {"xmin", -0.5}, {"xmax", 3.5}}},
+        {"nJets",          {{"nbins",  8}, {"xmin",  0.5}, {"xmax", 8.5}}},
+        {"secJetEta",      {{"nbins", 20}, {"xmin", -5  }, {"xmax", 5.}}},
+        {"secJetPhi",      {{"nbins", 20}, {"xmin", -3.2}, {"xmax", 3.2}}},
+        {"secJetPt",       {{"nbins", 15}, {"xmin",  0  }, {"xmax", 300}}},
+        {"secJetbTag",     {{"nbins", 10}, {"xmin",  0  }, {"xmax", 1}}},
+        {"thirdJetEta",    {{"nbins", 20}, {"xmin", -5  }, {"xmax", 5.}}},
+        {"thirdJetPhi",    {{"nbins", 20}, {"xmin", -3.2}, {"xmax", 3.2}}},
+        {"thirdJetPt",     {{"nbins", 15}, {"xmin",  0  }, {"xmax", 300}}},
+        {"thirdJetbTag",   {{"nbins", 10}, {"xmin",  0  }, {"xmax", 1}}},
+        {"topEta",         {{"nbins", 10}, {"xmin", -2.5}, {"xmax", 2.5}}},
+        {"topMass",        {{"nbins", 20}, {"xmin",  0  }, {"xmax", 500}}},
+        {"topPhi",         {{"nbins", 20}, {"xmin", -3.2}, {"xmax", 3.2}}},
+        {"topPt",          {{"nbins", 20}, {"xmin",  0  }, {"xmax", 500}}},
+        {"totEta",         {{"nbins", 10}, {"xmin", -2.5}, {"xmax", 2.5}}},
+        {"totHt",          {{"nbins", 20}, {"xmin",150  }, {"xmax", 1500}}},
+        {"totHtOverPt",    {{"nbins", 20}, {"xmin",  0  }, {"xmax", 4}}},
+        {"totPt",          {{"nbins", 10}, {"xmin",  0  }, {"xmax", 250}}},
+        {"totPt2Jet",      {{"nbins", 20}, {"xmin",  0  }, {"xmax", 500}}},
+        {"totPtVec",       {{"nbins", 20}, {"xmin",  0  }, {"xmax", 200}}},
+        {"totVecM",        {{"nbins", 20}, {"xmin",  0  }, {"xmax", 300}}},
+        {"w1TopDelPhi",    {{"nbins", 20}, {"xmin",  0  }, {"xmax", 3.2}}},
+        {"w1TopDelR",      {{"nbins", 20}, {"xmin",  0  }, {"xmax", 7}}},
+        {"w2TopDelPhi",    {{"nbins", 20}, {"xmin",  0  }, {"xmax", 3.2}}},
+        {"w2TopDelR",      {{"nbins", 20}, {"xmin",  0  }, {"xmax", 7}}},
+        {"wPairEta",       {{"nbins", 20}, {"xmin", -5  }, {"xmax", 5.}}},
+        {"wPairMass",      {{"nbins", 10}, {"xmin",  0  }, {"xmax", 200}}},
+        {"wPairPhi",       {{"nbins", 20}, {"xmin", -3.2}, {"xmax", 3.2}}},
+        {"wPairPt",        {{"nbins", 20}, {"xmin",  0  }, {"xmax", 500}}},
+        {"wQuark1Eta",     {{"nbins", 20}, {"xmin", -5  }, {"xmax", 5.}}},
+        {"wQuark1Phi",     {{"nbins", 20}, {"xmin", -3.2}, {"xmax", 3.2}}},
+        {"wQuark1Pt",      {{"nbins", 20}, {"xmin",  0  }, {"xmax", 500}}},
+        {"wQuark2Eta",     {{"nbins", 20}, {"xmin", -5  }, {"xmax", 5.}}},
+        {"wQuark2Phi",     {{"nbins", 20}, {"xmin", -3.2}, {"xmax", 3.2}}},
+        {"wQuark2Pt",      {{"nbins", 20}, {"xmin",  0  }, {"xmax", 500}}},
+        {"wQuarkHt",       {{"nbins", 15}, {"xmin",  0  }, {"xmax", 150}}},
+        {"wTopDelPhi",     {{"nbins", 20}, {"xmin",  0  }, {"xmax", 3.2}}},
+        {"wTopDelR",       {{"nbins", 20}, {"xmin",  0  }, {"xmax", 7}}},
+        {"wwdelPhi",       {{"nbins", 10}, {"xmin",  0  }, {"xmax", 3.2}}},
+        {"wwdelR",         {{"nbins", 20}, {"xmin",  0  }, {"xmax", 6}}},
+        {"wzdelPhi",       {{"nbins", 20}, {"xmin",  0  }, {"xmax", 3.2}}},
+        {"wzdelR",         {{"nbins", 20}, {"xmin",  0  }, {"xmax", 7}}},
+        {"zEta",           {{"nbins", 10}, {"xmin", -2.5}, {"xmax", 2.5}}},
+        {"zLepdelPhi",     {{"nbins", 20}, {"xmin", -4  }, {"xmax", 4}}},
+        {"zLepdelR",       {{"nbins", 15}, {"xmin",  0  }, {"xmax", 6}}},
+        {"zMass",          {{"nbins", 20}, {"xmin",  0  }, {"xmax", 500}}},
+        {"zPhi",           {{"nbins", 20}, {"xmin", -3.2}, {"xmax", 3.2}}},
+        {"zPt",            {{"nbins", 20}, {"xmin",  0  }, {"xmax", 500}}},
+        {"zQuark1DelPhi",  {{"nbins", 20}, {"xmin", -4  }, {"xmax", 4}}},
+        {"zQuark1DelR",    {{"nbins", 15}, {"xmin",  0  }, {"xmax", 6}}},
+        {"zQuark2DelPhi",  {{"nbins", 20}, {"xmin", -4  }, {"xmax", 4}}},
+        {"zQuark2DelR",    {{"nbins", 15}, {"xmin",  0  }, {"xmax", 6}}},
+        {"zTopDelPhi",     {{"nbins", 20}, {"xmin", -4  }, {"xmax", 4}}},
+        {"zTopDelR",       {{"nbins", 15}, {"xmin",  0  }, {"xmax", 6}}},
+        {"zjminPhi",       {{"nbins", 15}, {"xmin",  0  }, {"xmax", 3.2}}},
+        {"zjminR",         {{"nbins", 15}, {"xmin",  0  }, {"xmax", 3.5}}},
+        {"zl1Quark1DelPhi",{{"nbins", 20}, {"xmin", -4  }, {"xmax", 4}}},
+        {"zl1Quark1DelR",  {{"nbins", 15}, {"xmin",  0  }, {"xmax", 6}}},
+        {"zl1Quark2DelPhi",{{"nbins", 20}, {"xmin", -4  }, {"xmax", 4}}},
+        {"zl1Quark2DelR",  {{"nbins", 15}, {"xmin",  0  }, {"xmax", 6}}},
+        {"zl1TopDelPhi",   {{"nbins", 20}, {"xmin", -4  }, {"xmax", 4}}},
+        {"zl1TopDelR",     {{"nbins", 15}, {"xmin",  0  }, {"xmax", 6}}},
+        {"zl2Quark1DelPhi",{{"nbins", 20}, {"xmin", -4  }, {"xmax", 4}}},
+        {"zl2Quark1DelR",  {{"nbins", 15}, {"xmin",  0  }, {"xmax", 6}}},
+        {"zl2Quark2DelPhi",{{"nbins", 20}, {"xmin", -4  }, {"xmax", 4}}},
+        {"zl2Quark2DelR",  {{"nbins", 15}, {"xmin",  0  }, {"xmax", 6}}},
+        {"zl2TopDelPhi",   {{"nbins", 20}, {"xmin", -4  }, {"xmax", 4}}},
+        {"zl2TopDelR",     {{"nbins", 15}, {"xmin",  0  }, {"xmax", 6}}},
+        {"zlb1DelPhi",     {{"nbins", 20}, {"xmin", -4  }, {"xmax", 4}}},
+        {"zlb1DelR",       {{"nbins", 15}, {"xmin",  0  }, {"xmax", 6}}},
+        {"zlb2DelPhi",     {{"nbins", 20}, {"xmin", -4  }, {"xmax", 4}}},
+        {"zlb2DelR",       {{"nbins", 15}, {"xmin",  0  }, {"xmax", 6}}}
+    };
+
     vector<TH1F*> histovect;
     for (size_t j{0}; j < varList.size(); j++)
     {
-        int nbins=1;
-        double xmin = -1000;
-        double xmax = 1000;
+        int nbins;
+        double xmin;
+        double xmax;
 
-        if      (varList[j]=="mTW"            ){nbins = 10; xmin =  0;   xmax = 200;}
-        else if (varList[j]=="wQuark1Pt"      ){nbins = 20; xmin =  0;   xmax = 500;}
-        else if (varList[j]=="wQuark1Eta"     ){nbins = 20; xmin = -5.; xmax = 5.;}
-        else if (varList[j]=="wQuark1Phi"     ){nbins = 20; xmin = -3.2;   xmax = 3.2;}
-        else if (varList[j]=="wQuark2Pt"      ){nbins = 20; xmin =  0;   xmax = 500;}
-        else if (varList[j]=="wQuark2Eta"     ){nbins = 20; xmin = -5.; xmax = 5.;}
-        else if (varList[j]=="wQuark2Phi"     ){nbins = 20; xmin = -3.2;   xmax = 3.2;}
-        else if (varList[j]=="wPairMass"      ){nbins = 10; xmin =  0;   xmax = 200;}
-        else if (varList[j]=="wPairPt"        ){nbins = 20; xmin =  0;   xmax = 500;}
-        else if (varList[j]=="wPairEta"       ){nbins = 20; xmin = -5.;   xmax = 5.;}
-        else if (varList[j]=="wPairPhi"       ){nbins = 20; xmin = -3.2;   xmax = 3.2;}
-        else if (varList[j]=="met"            ){nbins = 10; xmin =  0;   xmax = 200;}
-        else if (varList[j]=="nJets"          ){nbins =  8; xmin =  0.5; xmax = 8.5;}
-        else if (varList[j]=="leadJetPt"      ){nbins = 20; xmin =  0;   xmax = 500;}
-        else if (varList[j]=="leadJetPhi"     ){nbins = 20; xmin = -3.2; xmax = 3.2;}
-        else if (varList[j]=="leadJetEta"     ){nbins = 10; xmin = -2.5; xmax = 2.5;}
-        else if (varList[j]=="leadJetbTag"    ){nbins = 10; xmin =  0;   xmax = 1;}
-        else if (varList[j]=="secJetPt"       ){nbins = 15; xmin =  0;   xmax = 300;}
-        else if (varList[j]=="secJetPhi"      ){nbins = 20; xmin = -3.2;   xmax = 3.2;}
-        else if (varList[j]=="secJetEta"      ){nbins = 20; xmin = -5.;   xmax = 5.;}
-        else if (varList[j]=="secJetbTag"     ){nbins = 10; xmin =  0;   xmax = 1;}
-        else if (varList[j]=="thirdJetPt"     ){nbins = 15; xmin =  0;   xmax = 300;}
-        else if (varList[j]=="thirdJetPhi"    ){nbins = 20; xmin = -3.2;   xmax = 3.2;}
-        else if (varList[j]=="thirdJetEta"    ){nbins = 20; xmin = -5.;   xmax = 5.;}
-        else if (varList[j]=="thirdJetbTag"   ){nbins = 10; xmin =  0;   xmax = 1;}
-        else if (varList[j]=="fourthJetPt"    ){nbins = 15; xmin =  0;   xmax = 300;}
-        else if (varList[j]=="fourthJetPhi"   ){nbins = 20; xmin = -3.2;   xmax = 3.2;}
-        else if (varList[j]=="fourthJetEta"   ){nbins = 20; xmin = -5.;   xmax = 5.;}
-        else if (varList[j]=="fourthJetbTag"  ){nbins = 10; xmin =  0;   xmax = 1;}
-        else if (varList[j]=="nBjets"         ){nbins =  4; xmin = -0.5;xmax = 3.5;}
-        else if (varList[j]=="bTagDisc"       ){nbins = 10; xmin =  0.6;   xmax = 1;}
-        else if (varList[j]=="lep1Pt"         ){nbins = 20; xmin =  0;   xmax = 500;}
-        else if (varList[j]=="lep1Eta"        ){nbins = 20; xmin = -5.; xmax = 5.;}
-        else if (varList[j]=="lep1Phi"        ){nbins = 20; xmin = -3.2;   xmax = 3.2;}
-        else if (varList[j]=="lep1RelIso"     ){nbins = 50; xmin =  0.;   xmax = 0.2;}
-        else if (varList[j]=="lep1D0"         ){nbins = 10; xmin =  0.;   xmax = 0.1;}
-        else if (varList[j]=="lep2Pt"         ){nbins = 20; xmin =  0;   xmax = 500;}
-        else if (varList[j]=="lep2Eta"        ){nbins = 20; xmin = -5.; xmax = 5.;}
-        else if (varList[j]=="lep2Phi"        ){nbins = 20; xmin = -3.2;   xmax = 3.2;}
-        else if (varList[j]=="lep2RelIso"     ){nbins = 50; xmin =  0.;   xmax = 0.2;}
-        else if (varList[j]=="lep2D0"         ){nbins = 10; xmin =  0.;   xmax = 0.1;}
-        else if (varList[j]=="lepMass"        ){nbins = 20; xmin =  0;   xmax = 500;}
-        else if (varList[j]=="lepPt"          ){nbins = 20; xmin =  0;   xmax = 500;}
-        else if (varList[j]=="lepEta"         ){nbins = 20; xmin = -5.; xmax = 5.;}
-        else if (varList[j]=="lepPhi"         ){nbins = 20; xmin = -3.2;   xmax = 3.2;}
-        else if (varList[j]=="zMass"          ){nbins = 20; xmin =  0;   xmax = 500;}
-        else if (varList[j]=="zPt"            ){nbins = 20; xmin =  0;   xmax = 500;}
-        else if (varList[j]=="zEta"           ){nbins = 10; xmin = -2.5;xmax = 2.5;}
-        else if (varList[j]=="zPhi"           ){nbins = 20; xmin = -3.2;xmax = 3.2;}
-        else if (varList[j]=="topMass"        ){nbins = 20; xmin =  0;   xmax = 500;}
-        else if (varList[j]=="topPt"          ){nbins = 20; xmin =  0;   xmax = 500;}
-        else if (varList[j]=="topEta"         ){nbins = 10; xmin = -2.5;xmax = 2.5;}
-        else if (varList[j]=="topPhi"         ){nbins = 20; xmin = -3.2;xmax = 3.2;}
-        else if (varList[j]=="jjdelR"         ){nbins = 20; xmin =  0; xmax = 6;}
-        else if (varList[j]=="jjdelPhi"       ){nbins = 10; xmin =  0; xmax = 3.2;}
-        else if (varList[j]=="wwdelR"         ){nbins = 20; xmin =  0; xmax = 6;}
-        else if (varList[j]=="wwdelPhi"       ){nbins = 10; xmin =  0; xmax = 3.2;}
-        else if (varList[j]=="zLepdelR"       ){nbins = 15; xmin =  0; xmax = 6;}
-        else if (varList[j]=="zLepdelPhi"     ){nbins = 20; xmin = -4; xmax = 4;}
-        else if (varList[j]=="zl1Quark1DelR"  ){nbins = 15; xmin =  0; xmax = 6;}
-        else if (varList[j]=="zl1Quark1DelPhi"){nbins = 20; xmin = -4; xmax = 4;}
-        else if (varList[j]=="zl1Quark2DelR"  ){nbins = 15; xmin =  0; xmax = 6;}
-        else if (varList[j]=="zl1Quark2DelPhi"){nbins = 20; xmin = -4; xmax = 4;}
-        else if (varList[j]=="zl2Quark1DelR"  ){nbins = 15; xmin =  0; xmax = 6;}
-        else if (varList[j]=="zl2Quark1DelPhi"){nbins = 20; xmin = -4; xmax = 4;}
-        else if (varList[j]=="zl2Quark2DelR"  ){nbins = 15; xmin =  0; xmax = 6;}
-        else if (varList[j]=="zl2Quark2DelPhi"){nbins = 20; xmin = -4; xmax = 4;}
-        else if (varList[j]=="zlb1DelR"       ){nbins = 15; xmin =  0; xmax = 6;}
-        else if (varList[j]=="zlb1DelPhi"     ){nbins = 20; xmin = -4; xmax = 4;}
-        else if (varList[j]=="zlb2DelR"       ){nbins = 15; xmin =  0; xmax = 6;}
-        else if (varList[j]=="zlb2DelPhi"     ){nbins = 20; xmin = -4; xmax = 4;}
-        else if (varList[j]=="lepHt"          ){nbins = 15; xmin =  0; xmax = 4;}
-        else if (varList[j]=="wQuarkHt"       ){nbins = 15; xmin =  0; xmax = 150;}
-        else if (varList[j]=="totPt"          ){nbins = 10; xmin =  0;   xmax = 250;}
-        else if (varList[j]=="totEta"         ){nbins = 10; xmin = -2.5;xmax = 2.5;}
-        else if (varList[j]=="totPtVec"       ){nbins = 20; xmin =  0; xmax = 200;}
-        else if (varList[j]=="totVecM"        ){nbins = 20; xmin =  0; xmax = 300;}
-        else if (varList[j]=="totPt2Jet"      ){nbins = 20; xmin =  0;   xmax = 500;}
-        else if (varList[j]=="wzdelR"         ){nbins = 20; xmin =  0; xmax = 7;}
-        else if (varList[j]=="wzdelPhi"       ){nbins = 20; xmin =  0; xmax = 3.2;}
-        else if (varList[j]=="zQuark1DelR"    ){nbins = 15; xmin =  0; xmax = 6;}
-        else if (varList[j]=="zQuark1DelPhi"  ){nbins = 20; xmin = -4; xmax = 4;}
-        else if (varList[j]=="zQuark2DelR"    ){nbins = 15; xmin =  0; xmax = 6;}
-        else if (varList[j]=="zQuark2DelPhi"  ){nbins = 20; xmin = -4; xmax = 4;}
-        else if (varList[j]=="zTopDelR"       ){nbins = 15; xmin =  0; xmax = 6;}
-        else if (varList[j]=="zTopDelPhi"     ){nbins = 20; xmin = -4; xmax = 4;}
-        else if (varList[j]=="zl1TopDelR"     ){nbins = 15; xmin =  0; xmax = 6;}
-        else if (varList[j]=="zl1TopDelPhi"   ){nbins = 20; xmin = -4; xmax = 4;}
-        else if (varList[j]=="zl2TopDelR"     ){nbins = 15; xmin =  0; xmax = 6;}
-        else if (varList[j]=="zl2TopDelPhi"   ){nbins = 20; xmin = -4; xmax = 4;}
-        else if (varList[j]=="zjminR"         ){nbins = 15; xmin =  0; xmax = 3.5;}
-        else if (varList[j]=="zjminPhi"       ){nbins = 15; xmin =  0; xmax = 3.2;}
-        else if (varList[j]=="totHt"          ){nbins = 20; xmin =150; xmax = 1500;}
-        else if (varList[j]=="jetHt"          ){nbins = 20; xmin =  0; xmax = 500;}
-        else if (varList[j]=="totHtOverPt"    ){nbins = 20; xmin =  0; xmax = 4;}
-        else if (varList[j]=="wTopDelR"       ){nbins = 20; xmin =  0; xmax = 7;}
-        else if (varList[j]=="wTopDelPhi"     ){nbins = 20; xmin =  0; xmax = 3.2;}
-        else if (varList[j]=="w1TopDelR"      ){nbins = 20; xmin =  0; xmax = 7;}
-        else if (varList[j]=="w1TopDelPhi"    ){nbins = 20; xmin =  0; xmax = 3.2;}
-        else if (varList[j]=="w2TopDelR"      ){nbins = 20; xmin =  0; xmax = 7;}
-        else if (varList[j]=="w2TopDelPhi"    ){nbins = 20; xmin =  0; xmax = 3.2;}
-        else {cout << "warning : no TH1F definition for variable " << varList[j] << endl;}
+        if (histProperties.find(varList[j].Data()) != histProperties.end())
+        {
+            nbins = histProperties.at(varList[j].Data()).at("nbins");
+            xmin = histProperties.at(varList[j].Data()).at("xmin");
+            xmax = histProperties.at(varList[j].Data()).at("xmax");
+        }
+        else
+        {
+            cout << "warning : no TH1F definition for variable "
+                << varList[j] << endl;
+
+            nbins = 1;
+            xmin = -1000;
+            xmax = 1000;
+        }
 
         TH1F* const histo{new TH1F{(varList[j]+"_"+channel+"__"+sample),
             (varList[j]+"_"+channel+"__"+sample), nbins, xmin, xmax}};
