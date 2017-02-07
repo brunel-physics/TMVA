@@ -9,9 +9,7 @@
 
 namespace
 {
-    const std::unordered_set<std::string> blackList{
-        "MVA_mumu__TbartChan__bTag__plus",
-        "MVA_mumu__TbartChan__bTag__minus"};
+    const std::unordered_set<std::string> blackList{};
 }  // namespace
 
 bool ProdTemplate(const TString& inputdistrib,
@@ -25,20 +23,6 @@ bool ProdTemplate(const TString& inputdistrib,
 
     TH1F* histBdt_DataEG;
     TH1F* histBdt_DataMu;
-    if (pseudodata)
-    {
-        histBdt_DataMu = dynamic_cast<TH1F*>
-            (inputfile->Get((inputdistrib+"__DATA").Data())->Clone());
-    }
-    else
-    {
-        histBdt_DataEG= dynamic_cast<TH1F*>
-            (inputfile->Get((inputdistrib+"__DataEG").Data())->Clone());
-        histBdt_DataMu = dynamic_cast<TH1F*>
-            (inputfile->Get((inputdistrib+"__DataMu").Data())->Clone());
-
-        histBdt_DataMu->Add(histBdt_DataEG);
-    }
 
     std::vector<TH1F*> distrib_MC;
     std::vector<TH1F*> distrib_MC_sys;
@@ -99,6 +83,20 @@ bool ProdTemplate(const TString& inputdistrib,
     TFile* outputfile{new TFile{outputfilename.Data(), "recreate"}};
     outputfile->cd();
 
+    if (pseudodata)
+    {
+        histBdt_DataMu = dynamic_cast<TH1F*>
+            (inputfile->Get((inputdistrib+"__DATA").Data())->Clone());
+    }
+    else
+    {
+        histBdt_DataEG= dynamic_cast<TH1F*>
+            (inputfile->Get((inputdistrib+"__DataEG").Data())->Clone());
+        histBdt_DataMu = dynamic_cast<TH1F*>
+            (inputfile->Get((inputdistrib+"__DataMu").Data())->Clone());
+
+        histBdt_DataMu->Add(histBdt_DataEG);
+    }
     if (theta)
     {
         histBdt_DataMu->Write((inputdistrib+"__DATA").Data() );
@@ -131,13 +129,13 @@ bool ProdTemplate(const TString& inputdistrib,
 void ProdTemplate(const bool theta=false, const bool pseudodata=true)
 {
     const std::vector<TString> sampleList{
-        "tZq",
         "DYToLL_M50",
         "TbartChan",
         "TbartW",
         "TT",
         "TtW",
         "TTW",
+        "tZq",
         "TTZ",
         "ZZ"};
 
