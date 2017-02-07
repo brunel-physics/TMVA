@@ -18,19 +18,19 @@
 MVATool::MVATool(const bool doCtrlReg)
     : varList{
         "bTagDisc",
-        "fourthJetEta",
+        // "fourthJetEta",
         // "fourthJetPhi",
         // "fourthJetPt",
         // "fourthJetbTag",
         // "jetHt",
         // "jjdelPhi",
         "jjdelR",
-        "leadJetEta",
+        // "leadJetEta",
         // "leadJetPhi",
         // "leadJetPt",
         // "leadJetbTag",
         // "lep1D0",
-        // "lep1Eta",
+        "lep1Eta",
         // "lep1Phi",
         // "lep1Pt",
         // "lep1RelIso",
@@ -44,7 +44,7 @@ MVATool::MVATool(const bool doCtrlReg)
         "lepMass",
         // "lepPhi",
         // "lepPt",
-        "mTW",
+        // "mTW",
         "met",
         // "nBjets",
         // "nJets",
@@ -52,13 +52,13 @@ MVATool::MVATool(const bool doCtrlReg)
         // "secJetPhi",
         // "secJetPt",
         // "secJetbTag",
-        // "thirdJetEta",
+        "thirdJetEta",
         // "thirdJetPhi",
         // "thirdJetPt",
         // "thirdJetbTag",
         // "topEta",
         "topMass",
-        "topPhi",
+        // "topPhi",
         // "topPt",
         // "totEta",
         // "totHt",
@@ -69,7 +69,7 @@ MVATool::MVATool(const bool doCtrlReg)
         "totVecM",
         // "w1TopDelPhi",
         // "w1TopDelR",
-        // "w2TopDelPhi"
+        "w2TopDelPhi",
         // "w2TopDelR",
         // "wPairEta",
         "wPairMass",
@@ -84,7 +84,7 @@ MVATool::MVATool(const bool doCtrlReg)
         // "wQuarkHt",
         // "wTopDelPhi",
         // "wTopDelR",
-        "wwdelPhi",
+        // "wwdelPhi",
         // "wwdelR",
         // "wzdelPhi",
         // "wzdelR",
@@ -103,8 +103,8 @@ MVATool::MVATool(const bool doCtrlReg)
         // "zjminPhi",
         // "zjminR",
         // "zl1Quark1DelPhi",
-        "zl1Quark1DelR",
-        // "zl1Quark2DelPhi",
+        // "zl1Quark1DelR",
+        "zl1Quark2DelPhi",
         // "zl1Quark2DelR",
         // "zl1TopDelPhi",
         // "zl1TopDelR",
@@ -112,9 +112,9 @@ MVATool::MVATool(const bool doCtrlReg)
         // "zl2Quark1DelR",
         // "zl2Quark2DelPhi",
         // "zl2Quark2DelR",
-        // "zl2TopDelPhi",
+        "zl2TopDelPhi",
         // "zl2TopDelR",
-        // "zlb1DelPhi",
+        "zlb1DelPhi",
         "zlb1DelR",
         // "zlb2DelPhi",
         "zlb2DelR",
@@ -233,8 +233,8 @@ void MVATool::doTraining(const TString& channel, const TString& inDir,
     // TTree* const background_DY10To50 {dynamic_cast<TTree*>(input_DY10To50->Get("Ttree_" + treePost + "DYToLL_M10To50"))};
 
     factory.AddSignalTree(signal, 1.);
-    // factory.AddBackgroundTree(background_TTZ, 1.);
-    // factory.AddBackgroundTree(background_TTW, 1.);
+    factory.AddBackgroundTree(background_TTZ, 1.);
+    factory.AddBackgroundTree(background_TTW, 1.);
     factory.AddBackgroundTree(background_TT, 1.);
     // factory.AddBackgroundTree(background_WZ, 1.);
     factory.AddBackgroundTree(background_ZZ, 1.);
@@ -242,7 +242,7 @@ void MVATool::doTraining(const TString& channel, const TString& inDir,
     factory.AddBackgroundTree(background_TbartChan, 1.);
     // factory.AddBackgroundTree(background_TsChan, 1.);
     factory.AddBackgroundTree(background_TtW, 1.);
-    // factory.AddBackgroundTree(background_TbartW, 1.);
+    factory.AddBackgroundTree(background_TbartW, 1.);
     factory.AddBackgroundTree(background_DY50, 1.);
     // factory.AddBackgroundTree(background_DY10To50, 1. );
 
