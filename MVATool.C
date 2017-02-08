@@ -9,6 +9,7 @@
 #include <TCut.h>
 
 #include <TMVA/TMVAGui.h>
+#include <TMVA/DataLoader.h>
 #include <TMVA/Factory.h>
 #include <TMVA/Tools.h>
 
@@ -195,6 +196,7 @@ void MVATool::doTraining(const TString& channel, const TString& inDir,
 
     TMVA::Factory factory{"BDT_trainning_" + channel + "_tzq", outputFile,
             "!V:!Silent:Color:DrawProgressBar:Transformations=I:AnalysisType=Classification"};
+    TMVA::DataLoader loader{"loader"};
 
     TFile* const input_sig{TFile::Open(inDir + "/histofile_tZq.root")};
     TFile* const input_TTZ{TFile::Open(inDir + "/histofile_TTZ.root")};
@@ -232,27 +234,27 @@ void MVATool::doTraining(const TString& channel, const TString& inDir,
     TTree* const background_DY50     {dynamic_cast<TTree*>(input_DY50->Get("Ttree_" + treePost + "DYToLL_M50"))};
     // TTree* const background_DY10To50 {dynamic_cast<TTree*>(input_DY10To50->Get("Ttree_" + treePost + "DYToLL_M10To50"))};
 
-    factory.AddSignalTree(signal, 1.);
-    factory.AddBackgroundTree(background_TTZ, 1.);
-    factory.AddBackgroundTree(background_TTW, 1.);
-    factory.AddBackgroundTree(background_TT, 1.);
-    // factory.AddBackgroundTree(background_WZ, 1.);
-    factory.AddBackgroundTree(background_ZZ, 1.);
-    // factory.AddBackgroundTree(background_TtChan, 1.);
-    factory.AddBackgroundTree(background_TbartChan, 1.);
-    // factory.AddBackgroundTree(background_TsChan, 1.);
-    factory.AddBackgroundTree(background_TtW, 1.);
-    factory.AddBackgroundTree(background_TbartW, 1.);
-    factory.AddBackgroundTree(background_DY50, 1.);
-    // factory.AddBackgroundTree(background_DY10To50, 1. );
+    loader.AddSignalTree(signal, 1.);
+    loader.AddBackgroundTree(background_TTZ, 1.);
+    loader.AddBackgroundTree(background_TTW, 1.);
+    loader.AddBackgroundTree(background_TT, 1.);
+    // loader.AddBackgroundTree(background_WZ, 1.);
+    loader.AddBackgroundTree(background_ZZ, 1.);
+    // loader.AddBackgroundTree(background_TtChan, 1.);
+    loader.AddBackgroundTree(background_TbartChan, 1.);
+    // loader.AddBackgroundTree(background_TsChan, 1.);
+    loader.AddBackgroundTree(background_TtW, 1.);
+    loader.AddBackgroundTree(background_TbartW, 1.);
+    loader.AddBackgroundTree(background_DY50, 1.);
+    // loader.AddBackgroundTree(background_DY10To50, 1. );
 
     for (const auto& var: varList)
     {
-        factory.AddVariable(var, 'F');
+        loader.AddVariable(var, 'F');
     }
 
-    factory.SetSignalWeightExpression    ("abs(EvtWeight)");
-    factory.SetBackgroundWeightExpression("abs(EvtWeight)");
+    loader.SetSignalWeightExpression    ("abs(EvtWeight)");
+    loader.SetBackgroundWeightExpression("abs(EvtWeight)");
 
     // Apply additional cuts on the signal and background samples (can be different)
     TCut mycuts{""}; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
@@ -274,10 +276,10 @@ void MVATool::doTraining(const TString& channel, const TString& inDir,
         }
     }
 
-    factory.PrepareTrainingAndTestTree(mycuts, mycutb,
+    loader.PrepareTrainingAndTestTree(mycuts, mycutb,
             "nTrain_Signal=0:nTrain_Background=0:SplitMode=Random:NormMode=NumEvents:!V");
 
-    factory.BookMethod(TMVA::Types::kBDT, "BDT",
+    factory.BookMethod(&loader, TMVA::Types::kBDT, "BDT",
             "!H:!V:NTrees=100:nEventsMin=100:MaxDepth=5:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning");
 
     // Train MVAs using the set of training events
@@ -335,7 +337,7 @@ void MVATool::doReading(const float bdtcut, const TString& channel,
         reader->AddVariable(varList.at(i),  &(treevars.at(i)));
     }
 
-    reader->BookMVA("BDT", ("weights/BDT_trainning_" + channel + "_tzq_BDT.weights.xml"));
+    reader->BookMVA("BDT", ("loader/weights/BDT_trainning_" + channel + "_tzq_BDT.weights.xml"));
 
     for (const auto& sample: samplelist)
     {
