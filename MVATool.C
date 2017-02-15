@@ -201,10 +201,10 @@ void MVATool::doTraining(const TString& channel, const TString& inDir,
     // Load the library
     TMVA::Tools::Instance();
 
-    const TString outfileName{("trainingBDT_" + channel + "_tZq_.root")};
+    const TString outfileName{("trainingDNN_" + channel + "_tZq_.root")};
     TFile* const outputFile{TFile::Open(outfileName, "RECREATE")};
 
-    TMVA::Factory factory{"BDT_trainning_" + channel + "_tzq", outputFile,
+    TMVA::Factory factory{"DNN_trainning_" + channel + "_tzq", outputFile,
             "!V:!Silent:Color:DrawProgressBar:Transformations=I:AnalysisType=Classification"};
     TMVA::DataLoader loader{"loader"};
 
@@ -286,8 +286,8 @@ void MVATool::doTraining(const TString& channel, const TString& inDir,
     loader.PrepareTrainingAndTestTree(mycuts, mycutb,
             "nTrain_Signal=0:nTrain_Background=0:SplitMode=Random:NormMode=NumEvents:!V");
 
-    factory.BookMethod(&loader, TMVA::Types::kBDT, "BDT",
-            "!H:!V:NTrees=100:nEventsMin=100:MaxDepth=5:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning");
+    factory.BookMethod(&loader, TMVA::Types::kDNN, "DNN",
+            "H");
 
     // Train MVAs using the set of training events
     factory.TrainAllMethods();
@@ -333,7 +333,7 @@ void MVATool::doReading(const float bdtcut, const TString& channel,
         reader.AddVariable(varList.at(i),  &(treevars.at(i)));
     }
 
-    reader.BookMVA("BDT", ("loader/weights/BDT_trainning_" + channel + "_tzq_BDT.weights.xml"));
+    reader.BookMVA("DNN", ("loader/weights/DNN_trainning_" + channel + "_tzq_DNN.weights.xml"));
 
     for (const auto& sampleList: {dataList, signalList, backgroundList})
     {
@@ -419,7 +419,7 @@ void MVATool::loopInSample(TFile& input, const TString& sample,
         }
         weight *= sf_local;
 
-        const double mvaValue = reader.EvaluateMVA("BDT");
+        const double mvaValue = reader.EvaluateMVA("DNN");
         if (mvaValue > bdtcut)
         {
             continue;
