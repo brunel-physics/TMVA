@@ -42,7 +42,7 @@ for var in vars:
 
         if (channels == "DATA"):
             datahist.Add(hist)
-        elif (channels != "DataEG" and channels != "DataMu")
+        elif (channels != "DataEG" and channels != "DataMu"):
             # hist.FillRandom("gaus", 200)
             hist.SetDirectory(fo)
             hist.SetFillColor(colour)
