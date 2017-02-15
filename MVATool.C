@@ -251,8 +251,8 @@ void MVATool::doTraining(const TString& channel, const TString& inDir,
         factory.AddVariable(var, 'F');
     }
 
-    factory.SetSignalWeightExpression    ("EvtWeight");
-    factory.SetBackgroundWeightExpression("EvtWeight");
+    factory.SetSignalWeightExpression    ("abs(EvtWeight)");
+    factory.SetBackgroundWeightExpression("abs(EvtWeight)");
 
     // Apply additional cuts on the signal and background samples (can be different)
     TCut mycuts{""}; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
