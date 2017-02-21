@@ -18,7 +18,9 @@ class MVATool final
     public:
         explicit MVATool(const bool doCtrlReg = false);
         MVATool(const vector<TString>& varList_,
-                const vector<TString>& sampleList_,
+                const vector<TString>& dataList_,
+                const vector<TString>& signalList_,
+                const vector<TString>& backgroundList_,
                 const vector<TString>& systList_,
                 const vector<TString>& regList_);
         ~MVATool();
@@ -51,7 +53,9 @@ class MVATool final
                 const bool useData) const;
 
         const vector<TString> varList;
-        const vector<TString> samplelist;
+        const vector<TString> dataList;
+        const vector<TString> signalList;
+        const vector<TString> backgroundList;
         const vector<TString> systlist;
         const vector<TString> regList;
 

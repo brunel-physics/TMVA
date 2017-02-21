@@ -121,25 +121,29 @@ MVATool::MVATool(const bool doCtrlReg)
         "zlb2DelR",
         ////  "Channel",
     }
-    , samplelist{
+    , dataList{
         "DataMu",
-        "DataEG",
-        "tZq",
-        // "THQ", // Empty tree - background totally cut
-        "TTZ",
-        "TTW",
-        "TT",
-        // "DYToLL_M10To50", // Empty tree - background totally cut
+        "DataEG"
+    }
+    , signalList{
+        "tZq"
+    }
+    , backgroundList{
+        "DYToLL_M10To50",
         "DYToLL_M50",
-        // "Wjets", // Empty tree - background totally cut
-        // "WW", // Empty tree - background totally cut
-        // "WZ", // Empty tree - background totally cut for sig/ctrl, all has 1 event
-        "ZZ",
-        // "TsChan", // Empty tree - background totally cut
-        // "TtChan", // Empty tree - background totally cut
+        // "THQ", // Currently broken
+        "TT",
+        "TTW",
+        "TTZ",
         "TbartChan",
+        "TbartW",
+        "TsChan",
+        "TtChan",
         "TtW",
-        "TbartW"
+        "WW",
+        "WZ",
+        "Wjets",
+        "ZZ"
     }
     , systlist{
         "",
@@ -171,11 +175,15 @@ MVATool::MVATool(const bool doCtrlReg)
 
 
 MVATool::MVATool(const vector<TString>& varList_,
-        const vector<TString>& sampleList_,
+        const vector<TString>& dataList_,
+        const vector<TString>& signalList_,
+        const vector<TString>& backgroundList_,
         const vector<TString>& systList_,
         const vector<TString>& regList_)
     : varList{varList_}
-    , samplelist{sampleList_}
+    , dataList{dataList_}
+    , signalList{signalList_}
+    , backgroundList{backgroundList_}
     , systlist{systList_}
     , regList{regList_}
 {}
@@ -198,61 +206,48 @@ void MVATool::doTraining(const TString& channel, const TString& inDir,
             "!V:!Silent:Color:DrawProgressBar:Transformations=I:AnalysisType=Classification"};
     TMVA::DataLoader loader{"loader"};
 
-    TFile* const input_sig{TFile::Open(inDir + "/histofile_tZq.root")};
-    TFile* const input_TTZ{TFile::Open(inDir + "/histofile_TTZ.root")};
-    TFile* const input_TTW{TFile::Open(inDir + "/histofile_TTW.root")};
-    // TFile* const input_THQ{TFile::Open(inDir + "/histofile_THQ.root")}; // Empty tree - background totally cut
-    TFile* const input_TT{TFile::Open(inDir + "/histofile_TT.root")};
-    // TFile* const input_WW{TFile::Open(inDir + "/histofile_WW.root")}; // Empty tree - background totally cut
-    // TFile* const input_WZ{TFile::Open(inDir + "/histofile_WZ.root")};
-    TFile* const input_ZZ{TFile::Open(inDir + "/histofile_ZZ.root")};
-    // TFile* const input_TtChan{TFile::Open(inDir + "/histofile_TtChan.root")}; // Empty tree - background totally cut
-    TFile* const input_TbartChan{TFile::Open(inDir + "/histofile_TbartChan.root")};
-    // TFile* const input_TsChan{TFile::Open(inDir + "/histofile_TsChan.root")}; // Empty tree - background totally cut
-    TFile* const input_TtW{TFile::Open(inDir + "/histofile_TtW.root")};
-    TFile* const input_TbartW{TFile::Open(inDir + "/histofile_TbartW.root")};
-    TFile* const input_DY50{TFile::Open(inDir + "/histofile_DYToLL_M50.root")};
-    // TFile* const input_DY10To50{TFile::Open(inDir + "/histofile_DYToLL_M10To50.root")}; // Empty tree - background totally cut
-
+    vector <TFile*> signalFiles;
+    vector <TFile*> backgroundFiles;
     const TString treePost{regList.size() < 2 ? ""
                                     : sigMode ? "sig_"
                                     : "ctrl_"};
 
-    TTree* const signal              {dynamic_cast<TTree*>(input_sig->Get("Ttree_" + treePost + "tZq"))};
-    TTree* const background_TTZ      {dynamic_cast<TTree*>(input_TTZ->Get("Ttree_" + treePost + "TTZ"))};
-    TTree* const background_TTW      {dynamic_cast<TTree*>(input_TTW->Get("Ttree_" + treePost + "TTW"))};
-    // TTree* const background_THQ     {dynamic_cast<TTree*>(input_TTW->Get("Ttree_" + treePost + "THQ"))};
-    TTree* const background_TT       {dynamic_cast<TTree*>(input_TT->Get("Ttree_" + treePost + "TT"))};
-    // TTree* const background_WW       {dynamic_cast<TTree*>(input_WW->Get("Ttree_" + treePost + "WW"))};
-    // TTree* const background_WZ       {dynamic_cast<TTree*>(input_WZ->Get("Ttree_" + treePost + "WZ"))};
-    TTree* const background_ZZ       {dynamic_cast<TTree*>(input_ZZ->Get("Ttree_" + treePost + "ZZ"))};
-    // TTree* const background_TtChan   {dynamic_cast<TTree*>(input_TtChan->Get("Ttree_" + treePost + "TtChan"))};
-    TTree* const background_TbartChan{dynamic_cast<TTree*>(input_TbartChan->Get("Ttree_" + treePost + "TbartChan"))};
-    // TTree* const background_TsChan   {dynamic_cast<TTree*>(input_TsChan->Get("Ttree_" + treePost + "TsChan"))};
-    TTree* const background_TtW      {dynamic_cast<TTree*>(input_TtW->Get("Ttree_" + treePost + "TtW"))};
-    TTree* const background_TbartW   {dynamic_cast<TTree*>(input_TbartW->Get("Ttree_" + treePost + "TbartW"))};
-    TTree* const background_DY50     {dynamic_cast<TTree*>(input_DY50->Get("Ttree_" + treePost + "DYToLL_M50"))};
-    // TTree* const background_DY10To50 {dynamic_cast<TTree*>(input_DY10To50->Get("Ttree_" + treePost + "DYToLL_M10To50"))};
-
-    loader.AddSignalTree(signal, 1.);
-    loader.AddBackgroundTree(background_TTZ, 1.);
-    loader.AddBackgroundTree(background_TTW, 1.);
-    loader.AddBackgroundTree(background_TT, 1.);
-    // loader.AddBackgroundTree(background_WZ, 1.);
-    loader.AddBackgroundTree(background_ZZ, 1.);
-    // loader.AddBackgroundTree(background_TtChan, 1.);
-    loader.AddBackgroundTree(background_TbartChan, 1.);
-    // loader.AddBackgroundTree(background_TsChan, 1.);
-    loader.AddBackgroundTree(background_TtW, 1.);
-    loader.AddBackgroundTree(background_TbartW, 1.);
-    loader.AddBackgroundTree(background_DY50, 1.);
-    // loader.AddBackgroundTree(background_DY10To50, 1. );
-
-    for (const auto& var: varList)
+    for (const auto& signal: signalList)  // add signal trees
+    {
+        signalFiles.emplace_back(TFile::Open(inDir + "/histofile_" + signal
+                    + ".root"));
+        TTree* signalTree{dynamic_cast<TTree*>
+            (signalFiles.back()->Get("Ttree_" + treePost + signal))};
+        if (signalTree->GetEntries() != 0)
+        {
+            loader.AddSignalTree(signalTree);
+        }
+        else
+        {
+            cout << "                         : Don't add Tree " << signal
+                << " as it's empty" << endl;
+        }
+    }
+    for (const auto& background: backgroundList)  // add background trees
+    {
+        backgroundFiles.emplace_back(TFile::Open(inDir + "/histofile_" + background
+                    + ".root"));
+        TTree* const backgroundTree{dynamic_cast<TTree*>
+            (backgroundFiles.back()->Get("Ttree_" + treePost + background))};
+        if (backgroundTree->GetEntries() != 0)
+        {
+            loader.AddBackgroundTree(backgroundTree);
+        }
+        else
+        {
+            cout << "                         : Don't add Tree " << background
+                << " as it's empty" << endl;
+        }
+    }
+    for (const auto& var: varList)  // add variables
     {
         loader.AddVariable(var, 'F');
     }
-
     loader.SetSignalWeightExpression    ("abs(EvtWeight)");
     loader.SetBackgroundWeightExpression("abs(EvtWeight)");
 
@@ -294,22 +289,13 @@ void MVATool::doTraining(const TString& channel, const TString& inDir,
     // Save the output
     outputFile->Close();
 
-    // Close input files
-    input_sig->Close();
-    input_TTZ->Close();
-    input_TTW->Close();
-    // input_THQ->Close();
-    input_TT->Close();
-    // input_WW->Close();
-    // input_WZ->Close();
-    input_ZZ->Close();
-    // input_TtChan->Close();
-    input_TbartChan->Close();
-    // input_TsChan->Close();
-    input_TtW->Close();
-    input_TbartW->Close();
-    input_DY50->Close();
-    // input_DY10To50->Close();
+    for (const auto& list: {signalFiles, backgroundFiles})  // close input files
+    {
+        for (const auto& file: list)
+        {
+            file->Close();
+        }
+    }
 
     cout << "==> Wrote root file: " << outputFile->GetName() << endl;
     cout << "==> TMVAClassification is done!" << endl;
@@ -322,7 +308,7 @@ void MVATool::doTraining(const TString& channel, const TString& inDir,
 }
 
 
-void MVATool::doReading(const float bdtcut, const TString& channel, 
+void MVATool::doReading(const float bdtcut, const TString& channel,
         const TString& inDir, const TString& outDir, const bool usePseudoData)
 {
     // This loads the library
@@ -339,33 +325,36 @@ void MVATool::doReading(const float bdtcut, const TString& channel,
 
     reader->BookMVA("BDT", ("loader/weights/BDT_trainning_" + channel + "_tzq_BDT.weights.xml"));
 
-    for (const auto& sample: samplelist)
+    for (const auto& sampleList: {dataList, signalList, backgroundList})
     {
-        //cout << sample << endl;
-        TFile* const inFile{new TFile{(inDir + "histofile_" + sample + ".root"), "read"}};
-        TFile* const outFile{new TFile{(outDir + "output_" + channel + "_" + sample+".root"), "recreate"}};
-        outFileMap[sample] = outFile;
-
-        //loop over systematics
-        cout << "processing sample " << sample << endl;
-
-        for (const auto& syst: systlist)
+        for (const auto& sample: sampleList)
         {
-            for (const auto& region: regList)
+            //cout << sample << endl;
+            TFile* const inFile{new TFile{(inDir + "histofile_" + sample + ".root"), "read"}};
+            TFile* const outFile{new TFile{(outDir + "output_" + channel + "_" + sample+".root"), "recreate"}};
+            outFileMap[sample] = outFile;
+
+            //loop over systematics
+            cout << "processing sample " << sample << endl;
+
+            for (const auto& syst: systlist)
             {
-                if ((sample == "DataMu" || sample == "DataEG") && syst != "")
+                for (const auto& region: regList)
                 {
-                    continue;
+                    if ((sample == "DataMu" || sample == "DataEG") && syst != "")
+                    {
+                        continue;
+                    }
+
+                    createHisto(region+sample + syst, channel);
+                    loopInSample(inFile, region + sample + syst, treevars, bdtcut, channel);
+                    writeHisto(sample, syst, region);
                 }
-
-                createHisto(region+sample + syst, channel);
-                loopInSample(inFile, region + sample + syst, treevars, bdtcut, channel);
-                writeHisto(sample, syst, region);
             }
-        }
 
-        inFile->Close();
-        outFile->Close();
+            inFile->Close();
+            outFile->Close();
+        }
     }
 }
 
@@ -648,28 +637,20 @@ void MVATool::makePseudoDataMVA(const TString& inDir, const TString& channel,
     TH1F* h_sum{nullptr};
     TH1F* h_tmp{nullptr};
 
-    for (const auto& sample: samplelist)
+    vector<TString> sampleList;
+    if (useData)
     {
-        if (!useData && sample.Contains("Data")) //From MC only
-        {
-            continue;
-        }
-        if (useData && (
-                    sample.Contains("DYToLL_M50")
-                    || sample.Contains("TT")
-                    || sample.Contains("TTW")
-                    || sample.Contains("TTZ")
-                    || sample.Contains("ZZ")
-                    || sample.Contains("WZ")
-                    || sample.Contains("WW")
-                    || sample.Contains("tZq")
-                    || sample.Contains("TbartChan")
-                    || sample.Contains("TtW")
-                    || sample.Contains("TbartW"))) //From Data only
-        {
-            continue;
-        }
+        sampleList = dataList;
+    }
+    else
+    {
+        sampleList = signalList;
+        sampleList.insert(sampleList.end(), backgroundList.begin(),
+                backgroundList.end());
+    }
 
+    for (const auto& sample: sampleList)
+    {
         h_tmp = nullptr;
         const TString histo_name{"MVA_" + channel + "__" + sample};
         if (!file.GetListOfKeys()->Contains(histo_name))
@@ -722,34 +703,26 @@ void MVATool::makePseudoDataVars(const TString& inDir, const TString& channel,
     TH1F* h_sum{nullptr};
     TH1F* h_tmp{nullptr};
 
+    vector<TString> sampleList;
+    if (useData)
+    {
+        sampleList = dataList;
+    }
+    else
+    {
+        sampleList = signalList;
+        sampleList.insert(sampleList.end(), backgroundList.begin(),
+                backgroundList.end());
+    }
+
     for (const auto& var: varList)
     {
         cout << " --- " << var << endl;
 
         h_sum = nullptr;
 
-        for (const auto& sample: samplelist)
+        for (const auto& sample: sampleList)
         {
-            if (!useData && sample.Contains("Data")) //From MC only
-            {
-                continue;
-            }
-            if (useData &&
-                    (sample.Contains("DYToLL_M50")
-                     || sample.Contains("TT")
-                     || sample.Contains("TTW")
-                     || sample.Contains("TTZ")
-                     || sample.Contains("ZZ")
-                     || sample.Contains("WZ")
-                     || sample.Contains("WW")
-                     || sample.Contains("tZq")
-                     || sample.Contains("TbartChan")
-                     || sample.Contains("TtW")
-                     || sample.Contains("TbartW"))) //From Data only
-            {
-                continue;
-            }
-
             h_tmp = nullptr;
             const TString histo_name{var + "_" + channel + "__" + sample};
             if (!file.GetListOfKeys()->Contains(histo_name))
