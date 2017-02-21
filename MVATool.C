@@ -7,6 +7,7 @@
 #include <boost/numeric/conversion/cast.hpp>
 
 #include <TCut.h>
+#include <TMath.h>
 
 #include <TMVA/TMVAGui.h>
 #include <TMVA/DataLoader.h>
@@ -221,6 +222,11 @@ void MVATool::doTraining(const TString& channel, const TString& inDir,
         if (signalTree->GetEntries() != 0)
         {
             loader.AddSignalTree(signalTree);
+            signalTree->Draw("EvtWeight", "", "goff");
+            cout << "                         : ("
+                << TMath::Mean(signalTree->GetSelectedRows(),
+                        signalTree->GetV1()) * signalTree->GetEntries()
+                << " events after weighting)" << endl;
         }
         else
         {
@@ -237,6 +243,11 @@ void MVATool::doTraining(const TString& channel, const TString& inDir,
         if (backgroundTree->GetEntries() != 0)
         {
             loader.AddBackgroundTree(backgroundTree);
+            backgroundTree->Draw("EvtWeight", "", "goff");
+            cout << "                         : ("
+                << TMath::Mean(backgroundTree->GetSelectedRows(),
+                        backgroundTree->GetV1()) * backgroundTree->GetEntries()
+                << " events after weighting)" << endl;
         }
         else
         {
