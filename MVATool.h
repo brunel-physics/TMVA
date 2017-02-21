@@ -63,7 +63,7 @@ class MVATool final
         map<TString, int> varMap;
         map<TString, TFile*> outFileMap;
 
-        TMVA::Reader *reader; 
+        TMVA::Reader reader; 
 };
 
 #endif

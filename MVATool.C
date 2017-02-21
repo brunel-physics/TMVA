@@ -167,6 +167,7 @@ MVATool::MVATool(const bool doCtrlReg)
     }
     , regList{[=] () -> vector<TString> {if (doCtrlReg) return {"sig_", "ctrl_"};
                                          else return{""};}()}
+    , reader{"!Color:!Silent"}
 {
     for (size_t i{0}; i < varList.size(); i++)
     {
@@ -325,16 +326,14 @@ void MVATool::doReading(const float bdtcut, const TString& channel,
     // This loads the library
     TMVA::Tools::Instance();
 
-    //create the BDT reader
-    reader = new TMVA::Reader{"!Color:!Silent"};
     vector<float> treevars(varList.size(), 0);
 
     for (size_t i{0}; i < varList.size(); i++)
     {
-        reader->AddVariable(varList.at(i),  &(treevars.at(i)));
+        reader.AddVariable(varList.at(i),  &(treevars.at(i)));
     }
 
-    reader->BookMVA("BDT", ("loader/weights/BDT_trainning_" + channel + "_tzq_BDT.weights.xml"));
+    reader.BookMVA("BDT", ("loader/weights/BDT_trainning_" + channel + "_tzq_BDT.weights.xml"));
 
     for (const auto& sampleList: {dataList, signalList, backgroundList})
     {
@@ -420,7 +419,7 @@ void MVATool::loopInSample(TFile* const input, const TString& sample,
         }
         weight *= sf_local;
 
-        const double mvaValue = reader->EvaluateMVA("BDT");
+        const double mvaValue = reader.EvaluateMVA("BDT");
         if (mvaValue > bdtcut)
         {
             continue;
