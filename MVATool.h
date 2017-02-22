@@ -34,7 +34,7 @@ class MVATool final
                 const TString& outDir = "outputroot/",
                 const bool usePseudoData = true);
 
-        void loopInSample(TFile* const input, const TString& sample,
+        void loopInSample(TFile& input, const TString& sample,
                 vector<float>& treevars, const float bdtcut,
                 const TString& channel);
 

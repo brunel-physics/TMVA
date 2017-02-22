@@ -340,7 +340,7 @@ void MVATool::doReading(const float bdtcut, const TString& channel,
         for (const auto& sample: sampleList)
         {
             //cout << sample << endl;
-            TFile* const inFile{new TFile{(inDir + "histofile_" + sample + ".root"), "read"}};
+            TFile inFile{inDir + "histofile_" + sample + ".root", "READ"};
             TFile* const outFile{new TFile{(outDir + "output_" + channel + "_" + sample+".root"), "recreate"}};
             outFileMap[sample] = outFile;
 
@@ -362,18 +362,18 @@ void MVATool::doReading(const float bdtcut, const TString& channel,
                 }
             }
 
-            inFile->Close();
+            inFile.Close();
             outFile->Close();
         }
     }
 }
 
 
-void MVATool::loopInSample(TFile* const input, const TString& sample,
+void MVATool::loopInSample(TFile& input, const TString& sample,
         vector<float>& treevars, const float bdtcut, const TString& channel)
 {
-    input->cd();
-    TTree* const theTree{dynamic_cast<TTree*>(input->Get("Ttree_"+sample))};
+    input.cd();
+    TTree* const theTree{dynamic_cast<TTree*>(input.Get("Ttree_"+sample))};
 
     for (size_t ivar{0}; ivar < varList.size(); ivar++)
     {
