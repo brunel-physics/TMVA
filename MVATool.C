@@ -287,7 +287,7 @@ void MVATool::doTraining(const TString& channel, const TString& inDir,
             "nTrain_Signal=0:nTrain_Background=0:SplitMode=Random:NormMode=NumEvents:!V");
 
     factory.BookMethod(&loader, TMVA::Types::kDNN, "DNN",
-            "H");
+            "H:V:Architecture=CPU");
 
     // Train MVAs using the set of training events
     factory.TrainAllMethods();
