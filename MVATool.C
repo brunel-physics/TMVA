@@ -132,7 +132,7 @@ MVATool::MVATool(const bool doCtrlReg)
     , backgroundList{
         "DYToLL_M10To50",
         "DYToLL_M50",
-        // "THQ", // Currently broken
+        "THQ",
         "TT",
         "TTW",
         "TTZ",
